@@ -1,0 +1,141 @@
+#!/usr/bin/python2.7
+#Auto survey
+import re,sys,os
+
+class answer:
+	def __init__(self):
+		self.ans = []
+				
+	def answer(self,a):
+		self.ans.append(a)
+
+class survey:
+	def __init__(self,f):
+		self.entries = []
+		self.results = []
+		
+		try:
+			self.f = open(sys.argv[0].replace('\jane.py','')+os.sep+f,'r')
+			for line in self.f.readlines():
+				l = line.replace('\n','')
+				#print l
+				self.entries.append(l)
+		except:
+			print 'Error in reading %s' % (f)
+		
+		self.questions = []
+		self.answers = []
+		self.user_answers = []
+		self.questions.append('Type of bread')
+		self.questions.append('Side order')
+		self.questions.append('Toasted')
+		self.questions.append('Meat')
+		self.questions.append('Beverage')
+		self.questions.append('Watch')
+		self.questions.append('Vegatarian')
+		self.answers.append('Cheap, more common bread;Expensive bread.')
+		self.answers.append('Chips;Drink;Cookies;Pickle')
+		self.answers.append('Yes;No;Sometimes')
+		self.answers.append('Bologna;Ham;Salami;Turkey')
+		self.answers.append('Coke;Pepsi;Water;Juice')
+		self.answers.append('Sports;Action;News;Drama')
+		self.answers.append('Yes;No')
+	
+	def get_answer(self,qn,an):
+		an_real=0
+		#print 'Got %s and %s' % (qn,an)
+		if an=='a':
+			an_real=0
+		elif an=='b':
+			an_real=1
+		elif an=='c':
+			an_real=2
+		elif an=='d':
+			an_real=3
+		elif an=='y':
+			an_real=0
+		elif an=='n':
+			an_real=1
+		#print self.questions[qn]
+		#print 'an_real %s' %(an_real)
+		#print self.answers[qn].split(';')[an_real]
+		print '%s: %s' % (self.questions[qn],self.answers[qn].split(';')[an_real])
+	
+	def get_answer_mult(self,qn,an):
+		an_real=''
+		#print 'Got %s and %s' % (qn,an)
+		if an!='dew':
+			for an_ in an:
+				if an_=='a':
+					an_real+='0'
+				elif an_=='b':
+					an_real+='1'
+				elif an_=='c':
+					an_real+='2'
+				elif an_=='d':
+					an_real+='3'
+				elif an_=='y':
+					an_real+='0'
+				elif an_=='n':
+					an_real+='1'
+		
+		#print self.questions[qn]
+		answer_string = ''
+		for a in an_real:
+			answer_string+=self.answers[qn].split(';')[int(a)]+' '
+		
+		print '%s: %s' % (self.questions[qn],answer_string)
+		
+		#if an_real==-1:
+		#	print self.answers[qn].split(';')[an_real]
+		#print '%s: %s' % (self.questions[qn],self.answers[qn].split(';')[an_real])
+	
+	def parse(self):
+		for entry in self.entries:
+			#temp = answer()
+			n=0
+
+			if entry.count('(')==0:
+				#self.results.append(temp)
+				#print 'checking %s' % (entry)
+				
+				for char in entry:
+					#print 'char: %s' %(char)
+					self.get_answer(n,char)
+					n+=1
+					if n==7:n=0;
+				print
+			else:
+				#print 'checking %s' % (entry)
+				freeze = -1
+				n=0
+				freeze_string = ''
+				for char in entry:
+					#are we near a combo? freeze are current spot, then.
+					if char=='(':
+						freeze = n
+					elif char==')':
+						na=n+(freeze-n)
+						n=na
+						freeze = -1
+						self.get_answer_mult(n,freeze_string.replace('(',''))
+						freeze_string = ''
+											
+					#are we frozen? if so,
+					if freeze == -1:
+						if char!=')':
+							self.get_answer(n,char)
+						n+=1
+					else:
+						#not frozen, so let's record our combo
+						freeze_string+=char
+				print
+					
+						
+	def get_data(self):
+		print 'Total surveys: %s' % (len(self.entries))
+		print 'Total answers parsed: %s' % (len(self.results))
+
+sur = survey('input.txt')
+sur.parse()
+sur.get_data()
